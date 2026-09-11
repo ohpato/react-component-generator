@@ -26,4 +26,14 @@ describe('PromptInput', () => {
     render(<PromptInput onGenerate={vi.fn()} isLoading={true} />);
     expect(screen.getByRole('button', { name: '생성 중...' })).toBeDisabled();
   });
+
+  it('프롬프트 입력을 500자로 제한하고 현재 길이를 표시한다', async () => {
+    const user = userEvent.setup();
+    render(<PromptInput onGenerate={vi.fn()} isLoading={false} />);
+
+    await user.type(screen.getByRole('textbox'), '가'.repeat(501));
+
+    expect(screen.getByRole('textbox')).toHaveValue('가'.repeat(500));
+    expect(screen.getByText('500 / 500자')).toBeInTheDocument();
+  });
 });
