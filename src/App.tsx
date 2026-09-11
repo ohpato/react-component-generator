@@ -11,12 +11,32 @@ const PROVIDER_CONFIG = {
   google: { label: 'Google', placeholder: 'AIza...' },
 } as const;
 
+type Theme = 'dark' | 'light' | 'retro';
+
+const NEXT_THEME: Record<Theme, Theme> = {
+  dark: 'light',
+  light: 'retro',
+  retro: 'dark',
+};
+
+const THEME_LABEL: Record<Theme, string> = {
+  dark: '다크',
+  light: '라이트',
+  retro: '레트로',
+};
+
+const THEME_ICON: Record<Theme, string> = {
+  dark: '◐',
+  light: '☼',
+  retro: '▣',
+};
+
 function App() {
   const [apiKey, setApiKey] = useState(() => localStorage.getItem(STORAGE_KEYS.apiKey) ?? '');
   const [showKey, setShowKey] = useState(false);
-  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+  const [theme, setTheme] = useState<Theme>(() => {
     const savedTheme = localStorage.getItem('rcg-theme');
-    if (savedTheme === 'light' || savedTheme === 'dark') return savedTheme;
+    if (savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'retro') return savedTheme;
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
   const [provider, setProvider] = useState<Provider>(loadProvider);
@@ -68,6 +88,7 @@ function App() {
   };
 
   const activeProvider = PROVIDER_CONFIG[provider].label;
+  const nextTheme = NEXT_THEME[theme];
 
   return (
     <div className="app">
@@ -93,12 +114,12 @@ function App() {
         <button
           className="theme-toggle"
           type="button"
-          onClick={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))}
-          aria-label={theme === 'dark' ? '라이트 테마로 전환' : '다크 테마로 전환'}
-          title={theme === 'dark' ? '라이트 테마로 전환' : '다크 테마로 전환'}
+          onClick={() => setTheme(nextTheme)}
+          aria-label={`${THEME_LABEL[nextTheme]} 테마로 전환`}
+          title={`${THEME_LABEL[nextTheme]} 테마로 전환`}
         >
-          <span aria-hidden="true">{theme === 'dark' ? '☼' : '◐'}</span>
-          <span>{theme === 'dark' ? '라이트' : '다크'}</span>
+          <span aria-hidden="true">{THEME_ICON[nextTheme]}</span>
+          <span>{THEME_LABEL[nextTheme]}</span>
         </button>
       </header>
 
