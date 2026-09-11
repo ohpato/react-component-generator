@@ -3,6 +3,7 @@ import { PromptInput } from './components/PromptInput';
 import { ComponentCard } from './components/ComponentCard';
 import { useComponentGenerator } from './hooks/useComponentGenerator';
 import type { Provider } from './types';
+import { loadPromptHistory, loadProvider, savePromptHistory, STORAGE_KEYS } from './utils/persistence';
 import './App.css';
 
 const PROVIDER_CONFIG = {
@@ -11,14 +12,15 @@ const PROVIDER_CONFIG = {
 } as const;
 
 function App() {
-  const [apiKey, setApiKey] = useState('');
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem(STORAGE_KEYS.apiKey) ?? '');
   const [showKey, setShowKey] = useState(false);
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const savedTheme = localStorage.getItem('rcg-theme');
     if (savedTheme === 'light' || savedTheme === 'dark') return savedTheme;
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
-  const [provider, setProvider] = useState<Provider>('google');
+  const [provider, setProvider] = useState<Provider>(loadProvider);
+  const [promptHistory, setPromptHistory] = useState<string[]>(loadPromptHistory);
   const [envKeys, setEnvKeys] = useState<Record<Provider, boolean>>({
     anthropic: false,
     google: false,
@@ -38,6 +40,18 @@ function App() {
     localStorage.setItem('rcg-theme', theme);
   }, [theme]);
 
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.apiKey, apiKey);
+  }, [apiKey]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.provider, provider);
+  }, [provider]);
+
+  useEffect(() => {
+    savePromptHistory(promptHistory);
+  }, [promptHistory]);
+
   const hasEnvKey = envKeys[provider];
 
   const handleGenerate = (prompt: string) => {
@@ -45,12 +59,12 @@ function App() {
       alert(`${PROVIDER_CONFIG[provider].label} API 키를 입력하거나 .env에 설정해주세요.`);
       return;
     }
+    setPromptHistory((history) => [prompt, ...history.filter((item) => item !== prompt)].slice(0, 10));
     generate(prompt, apiKey || undefined, provider);
   };
 
   const handleProviderChange = (newProvider: Provider) => {
     setProvider(newProvider);
-    setApiKey('');
   };
 
   const activeProvider = PROVIDER_CONFIG[provider].label;
@@ -90,7 +104,7 @@ function App() {
 
       <main className="workspace">
         <section className="composer-panel" aria-label="컴포넌트 생성">
-          <PromptInput onGenerate={handleGenerate} isLoading={isLoading} />
+          <PromptInput onGenerate={handleGenerate} isLoading={isLoading} promptHistory={promptHistory} />
         </section>
 
         <aside className="settings-panel" aria-label="실행 설정">
