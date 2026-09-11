@@ -13,6 +13,11 @@ const PROVIDER_CONFIG = {
 function App() {
   const [apiKey, setApiKey] = useState('');
   const [showKey, setShowKey] = useState(false);
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    const savedTheme = localStorage.getItem('rcg-theme');
+    if (savedTheme === 'light' || savedTheme === 'dark') return savedTheme;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
   const [provider, setProvider] = useState<Provider>('google');
   const [envKeys, setEnvKeys] = useState<Record<Provider, boolean>>({
     anthropic: false,
@@ -27,6 +32,11 @@ function App() {
       .then((data) => setEnvKeys(data.envKeys))
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem('rcg-theme', theme);
+  }, [theme]);
 
   const hasEnvKey = envKeys[provider];
 
@@ -48,7 +58,9 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <div className="brand-mark">RC</div>
+        <div className="brand-mark" aria-hidden="true">
+          <span>R</span><span>C</span>
+        </div>
         <div className="header-copy">
           <span className="eyebrow">React Component Generator</span>
           <h1>프롬프트로 만드는 UI 워크벤치</h1>
@@ -64,6 +76,16 @@ function App() {
             <strong>{components.length}</strong>
           </div>
         </div>
+        <button
+          className="theme-toggle"
+          type="button"
+          onClick={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))}
+          aria-label={theme === 'dark' ? '라이트 테마로 전환' : '다크 테마로 전환'}
+          title={theme === 'dark' ? '라이트 테마로 전환' : '다크 테마로 전환'}
+        >
+          <span aria-hidden="true">{theme === 'dark' ? '☼' : '◐'}</span>
+          <span>{theme === 'dark' ? '라이트' : '다크'}</span>
+        </button>
       </header>
 
       <main className="workspace">
