@@ -2,6 +2,7 @@
 
 :root { color-scheme: dark; font-synthesis: none; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
 :root[data-theme='light'] { color-scheme: light; }
+:root[data-theme='retro'] { color-scheme: dark; }
 
 body {
   min-width: 320px;
@@ -9,6 +10,10 @@ body {
   font-family: 'Pretendard Variable', Pretendard, 'Noto Sans KR', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: radial-gradient(circle at 77% -20%, var(--page-glow), transparent 36%), var(--page);
   color: var(--text);
+}
+
+:root[data-theme='retro'] body {
+  background-image: repeating-linear-gradient(0deg,rgba(255,192,77,.035) 0 1px,transparent 1px 4px), radial-gradient(circle at 77% -20%,var(--page-glow),transparent 36%);
 }
 
 button, input, select, textarea { font: inherit; }
